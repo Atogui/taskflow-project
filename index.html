@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" class="m-0 p-0 box-border">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/66b6826106.js" crossorigin="anonymous"></script>
+    <script src="app.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Document</title>
+</head>
+
+<body class="flex flex-col items-center font-['Roboto']">
+    <header class="justify-around p-20 pb-8">
+        <h1 class="text-5xl">My TaskFlow</h1>
+    </header>
+    <div class="[@media(max-width:1130px)]:ml-[5%] [@media(max-width:1130px)]:mr-4 [@media(max-width:920px)]:flex-col [@media(max-width:920px)]:items-center w-full min-w-[380px] flex flex-[row] p-12 justify-between">
+        <div class="[@media(max-width:920px)]:ml-0 w-2/5 ml-[10%] min-w-[380px] max-w-[450px]">
+            <h2 class="text-2xl">Mis tareas</h2>
+            <div class="m-4 ml-0 w-full flex justify-between">
+                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(34,_173,_46)]  text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Todas</button>
+                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Pendientes</button>
+                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Completadas</button>
+            </div>
+            <div class="extra flex justify-between ">
+                <button class="hover:cursor-pointer bg-[blue] hover:bg-[rgb(69,_69,_255)] text-[white] font-semibold mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="complete">Completar todas</button>
+                <button class="hover:cursor-pointer bg-[red] hover:bg-[rgb(255,_91,_91)] text-[white] font-semibold mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="wipe">Eliminar completadas</button>
+            </div>
+            <form id="form_tarea" class="m-4 ml-0">
+                <input class="border-none [border-bottom:solid] border p-[0.4rem] w-[85%] text-[16px]" id="input_tarea" type="text" placeholder="Añade una nueva tarea">
+                <button type="submit" class="bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer p-2 pr-[0.7rem] pl-[0.7rem] ml-2 border-none rounded-[12px] min-w-[40px] min-h-[40px] text-[18px]">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </form>
+            <input class="border-none [border-bottom:solid] border p-[0.4rem] w-[85%] text-[16px]" id="search" type="text" placeholder="Buscar tarea">
+            <ul class="Li_tareas [list-style:none]" id="Li_tareas"></ul>
+
+        </div>
+        
+        <div class="[@media(max-width:920px)]:mt-8 [@media(max-width:920px)]:ml-0 w-2/5 ml-[10%] min-w-[380px]">
+            <h2 class="text-2xl">Estadísticas</h2>
+            <p>Total: <span id="total"></span></p>
+            <p>Pendientes: <span id="pendientes"></span></p>
+            <p>Completadas: <span id="completadas"></span></p>
+        </div>
+    </div>
+    
+    <template id="tarea_template">
+        <li class="flex flex-row justify-between w-full p-4 m-4 ml-0 border-[darkgray] border border-solid rounded-[20px]"> 
+            <div class="flex"><input class="check mr-[10px] ml-[5px]" type="checkbox"><p class="desc_texto"></p></div>
+            <div class="botones_tarea">
+                <button class="hover:cursor-pointer border-none ml-2 mr-4 bg-[white] edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="hover:cursor-pointer border-none ml-2 mr-4 bg-[white] delete"><i class="fa-solid fa-x"></i></button>
+            </div>
+        </li>
+    </template>
+</body>
+</html>
