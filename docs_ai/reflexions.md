@@ -1,0 +1,1 @@
+En este último apartado voy a documentar las conclusiones a las que llegue con respecto al uso de la IA en el campo del desarrollo de software.

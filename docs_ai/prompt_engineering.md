@@ -1,0 +1,1 @@
+En este apartado voy a documentar las técnicas de prompt engineering aprendidas

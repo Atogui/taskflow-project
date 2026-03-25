@@ -1,0 +1,1 @@
+En este apartado voy a documentar el flujo de trabajo con Cursor.
