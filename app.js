@@ -1,6 +1,14 @@
 let tareas = [];
 let filtroActivo = "all";
 
+/**
+ * @typedef {Object} Task
+ * @property {number} id - Identificador único de la tarea.
+ * @property {string} title - Título/descrición de la tarea.
+ * @property {boolean} completed - Indica si la tarea está completada.
+ * @property {string} createdAt - Fecha de creación en formato ISO.
+ */
+
 const form = document.getElementById("form_tarea");
 const input = document.getElementById("input_tarea");
 const lista = document.getElementById("Li_tareas");
@@ -17,7 +25,11 @@ const busquedaInput = document.getElementById("search");
 cargarTareas();
 renderTareas();
 
-/* Funcion para crear una nueva tarea */
+/**
+ * Crea una nueva tarea.
+ * @param {string} title - Texto de la tarea.
+ * @returns {Task}
+ */
 function crearTarea(title){
     return{
         id: Date.now(),
@@ -68,7 +80,12 @@ busquedaInput.addEventListener("keyup", () => {
     renderTareas();
 });
 
-/* Funcion para renderizar las tareas */
+/**
+ * Renderiza la lista de tareas aplicando filtro y búsqueda.
+ * Efectos: actualiza el DOM y enlaza listeners de cada tarea.
+ * Depende del estado global: `tareas`, `filtroActivo` y `busquedaInput`.
+ * @returns {void}
+ */
 function renderTareas(){
   lista.innerHTML = "";
 
@@ -148,6 +165,10 @@ function renderTareas(){
   renderStats();
 }
 
+/**
+ * Renderiza estadísticas (total/completadas/pendientes).
+ * @returns {void}
+ */
 function renderStats(){
     
     const total = tareas.length;
@@ -161,10 +182,18 @@ function renderStats(){
     pendingEl.textContent = pending;
 }
 
+/**
+ * Persiste el array `tareas` en localStorage.
+ * @returns {void}
+ */
 function guardarTareas(){
     localStorage.setItem("tareas", JSON.stringify(tareas));
 }
 
+/**
+ * Carga tareas desde localStorage (si existen) y las asigna a `tareas`.
+ * @returns {void}
+ */
 function cargarTareas(){
     const tareasGuardadas = localStorage.getItem("tareas");
 
