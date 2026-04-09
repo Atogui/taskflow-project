@@ -39,6 +39,118 @@ function crearTarea(title){
     };
 }
 
+/**
+ * Devuelve las tareas filtradas por estado y búsqueda.
+ * @param {Task[]} tareasBase
+ * @param {"all"|"pending"|"completed"} filtro
+ * @param {string} query
+ * @returns {Task[]}
+ */
+function getTareasFiltradas(tareasBase, filtro, query){
+    let result = tareasBase;
+
+    if(filtro === "completed"){
+        result = result.filter(t => t.completed);
+    }
+
+    if(filtro === "pending"){
+        result = result.filter(t => !t.completed);
+    }
+
+    const q = query.trim().toLowerCase();
+    if(q){
+        result = result.filter(t => t.title.toLowerCase().includes(q));
+    }
+
+    return result;
+}
+
+/**
+ * Crea el fragmento DOM de una tarea a partir del template.
+ * @param {Task} tarea
+ * @returns {{
+ *  fragment: DocumentFragment,
+ *  textoEl: HTMLElement,
+ *  checkboxEl: HTMLInputElement,
+ *  editBtn: HTMLButtonElement,
+ *  deleteBtn: HTMLButtonElement
+ * }}
+ */
+function crearElementoTarea(tarea){
+    const fragment = template.content.cloneNode(true);
+
+    /** @type {HTMLElement} */
+    const textoEl = fragment.querySelector(".desc_texto");
+    textoEl.textContent = tarea.title;
+
+    /** @type {HTMLInputElement} */
+    const checkboxEl = fragment.querySelector(".check");
+    checkboxEl.checked = tarea.completed;
+
+    /** @type {HTMLButtonElement} */
+    const editBtn = fragment.querySelector(".edit");
+    /** @type {HTMLButtonElement} */
+    const deleteBtn = fragment.querySelector(".delete");
+
+    if(tarea.completed){
+        textoEl.classList.add("line-through");
+    }
+
+    return { fragment, textoEl, checkboxEl, editBtn, deleteBtn };
+}
+
+/**
+ * Enlaza eventos de una tarea (editar/completar/eliminar).
+ * @param {object} params
+ * @param {Task} params.tarea
+ * @param {HTMLElement} params.textoEl
+ * @param {HTMLInputElement} params.checkboxEl
+ * @param {HTMLButtonElement} params.editBtn
+ * @param {HTMLButtonElement} params.deleteBtn
+ * @returns {void}
+ */
+function bindTareaEvents({ tarea, textoEl, checkboxEl, editBtn, deleteBtn }){
+    checkboxEl.addEventListener("click", () =>{
+        tarea.completed = !tarea.completed;
+        renderTareas();
+        guardarTareas();
+    });
+
+    deleteBtn.addEventListener("click", () =>{
+        tareas = tareas.filter(t => t.id !== tarea.id);
+        renderTareas();
+        guardarTareas();
+    });
+
+    editBtn.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = tarea.title;
+      input.className = "bg-white/90 text-slate-900 placeholder:text-slate-500 border border-white/20 p-[0.4rem] text-[16px] rounded-[10px] w-full max-w-full";
+
+      textoEl.replaceWith(input);
+      input.focus();
+
+      const previousTitle = tarea.title;
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const nuevoTexto = input.value.trim();
+          tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
+          renderTareas();
+          guardarTareas();
+        }
+      });
+
+      input.addEventListener("blur", () => {
+        const nuevoTexto = input.value.trim();
+        tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
+        renderTareas();
+        guardarTareas();
+      });
+    });
+}
+
 botonesFiltro.forEach(btn => {
     btn.addEventListener("click", () => {
         botonesFiltro.forEach(b => b.classList.replace("bg-[rgb(34,_173,_46)]","bg-[rgb(51,_51,_51)]"));
@@ -89,80 +201,12 @@ busquedaInput.addEventListener("keyup", () => {
 function renderTareas(){
   lista.innerHTML = "";
 
-  let tareasFiltradas = tareas;
-
-  if(filtroActivo === "completed"){
-      tareasFiltradas = tareasFiltradas.filter(t => t.completed);
-  }
-
-  if(filtroActivo === "pending"){
-      tareasFiltradas = tareasFiltradas.filter(t => !t.completed);
-  }
-
-  if(busquedaInput.value){
-      const q = busquedaInput.value.toLowerCase();
-      tareasFiltradas = tareasFiltradas.filter(t => t.title.toLowerCase().includes(q));
-  }
-
-
+  const tareasFiltradas = getTareasFiltradas(tareas, filtroActivo, busquedaInput.value);
 
   tareasFiltradas.forEach(tarea =>{
-
-    const clone = template.content.cloneNode(true);
-
-    const texto = clone.querySelector(".desc_texto");
-    texto.textContent = tarea.title;
-
-    const checkbox = clone.querySelector(".check");
-    checkbox.checked = tarea.completed;
-
-    clone.querySelector(".edit").addEventListener("click", () => {
-      
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = tarea.title;
-      input.className = "bg-white/90 text-slate-900 placeholder:text-slate-500 border border-white/20 p-[0.4rem] text-[16px] rounded-[10px] w-full max-w-full";
-
-      texto.replaceWith(input);
-
-      input.focus();
-
-      const previousTitle = tarea.title;
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          const nuevoTexto = input.value.trim();
-          tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-          renderTareas();
-          guardarTareas();
-        }
-      });
-
-      input.addEventListener("blur", () => {
-        const nuevoTexto = input.value.trim();
-        tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-        renderTareas();
-        guardarTareas();
-      });
-    });
-
-    checkbox.addEventListener("click", () =>{
-        tarea.completed = !tarea.completed;
-        renderTareas();
-        guardarTareas();
-    });
-
-   clone.querySelector(".delete").addEventListener("click", () =>{
-        tareas = tareas.filter(t => t.id !== tarea.id);
-        renderTareas();
-        guardarTareas();
-    });
-
-    if (tarea.completed){
-        clone.querySelector(".desc_texto").classList.add("line-through");
-    }
-
-    lista.appendChild(clone);
+    const { fragment, textoEl, checkboxEl, editBtn, deleteBtn } = crearElementoTarea(tarea);
+    bindTareaEvents({ tarea, textoEl, checkboxEl, editBtn, deleteBtn });
+    lista.appendChild(fragment);
   });
 
   // Actualiza stats incluso si no hay tareas renderizadas
