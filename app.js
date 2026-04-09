@@ -54,7 +54,7 @@ form.addEventListener("submit", function(e){
   const texto = input.value.trim();
   if (texto === "") return;
 
-  const nuevaTarea = crearTarea(input.value);
+  const nuevaTarea = crearTarea(texto);
 
   tareas.push(nuevaTarea);
 
@@ -127,16 +127,20 @@ function renderTareas(){
 
       input.focus();
 
+      const previousTitle = tarea.title;
+
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-          tarea.title = input.value;
+          const nuevoTexto = input.value.trim();
+          tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
           renderTareas();
           guardarTareas();
         }
       });
 
       input.addEventListener("blur", () => {
-        tarea.title = input.value;
+        const nuevoTexto = input.value.trim();
+        tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
         renderTareas();
         guardarTareas();
       });
@@ -198,6 +202,24 @@ function cargarTareas(){
     const tareasGuardadas = localStorage.getItem("tareas");
 
     if(tareasGuardadas){
-        tareas = JSON.parse(tareasGuardadas);
+        try{
+            const parsed = JSON.parse(tareasGuardadas);
+            if(!Array.isArray(parsed)){
+                tareas = [];
+                return;
+            }
+
+            tareas = parsed
+              .filter(t => t && typeof t === "object")
+              .map(t => ({
+                  id: typeof t.id === "number" ? t.id : Date.now(),
+                  title: typeof t.title === "string" ? t.title.trim() : "",
+                  completed: Boolean(t.completed),
+                  createdAt: typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString()
+              }))
+              .filter(t => t.title !== "");
+        }catch{
+            tareas = [];
+        }
     }
 }
