@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="m-0 p-0 box-border">
+<html lang="es" class="m-0 p-0 box-border">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
     <script src="src/ui.js" defer></script>
     <script src="src/main.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Document</title>
+    <title>My TaskFlow</title>
 </head>
 
 <body class="min-h-screen flex flex-col items-center font-['Roboto'] text-slate-100 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
@@ -54,8 +54,8 @@
         <li class="flex flex-row justify-between w-full p-4 m-4 ml-0 border border-solid rounded-[20px] bg-white/10 border-white/20 backdrop-blur-sm"> 
             <div class="flex"><input class="check mr-[10px] ml-[5px]" type="checkbox"><p class="desc_texto"></p></div>
             <div class="botones_tarea">
-                <button class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-emerald-300 edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-red-300 delete"><i class="fa-solid fa-x"></i></button>
+                <button aria-label="Editar tarea" class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-emerald-300 edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button aria-label="Eliminar tarea" class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-red-300 delete"><i class="fa-solid fa-x"></i></button>
             </div>
         </li>
     </template>
