@@ -21,8 +21,93 @@ const completarTodasBtn = document.getElementById("complete");
 const eliminarCompletadasBtn = document.getElementById("wipe");
 const busquedaInput = document.getElementById("search");
 
+/**
+ * Devuelve una tarea por id.
+ * @param {number} id
+ * @returns {Task | undefined}
+ */
+function getTareaById(id){
+    return tareas.find(t => t.id === id);
+}
+
+/**
+ * Inicializa listeners delegados sobre la lista.
+ * @returns {void}
+ */
+function initListaDelegation(){
+    // Clicks en editar/eliminar
+    lista.addEventListener("click", (e) => {
+        const target = /** @type {HTMLElement} */ (e.target);
+        const li = target.closest("li");
+        if(!li || !lista.contains(li)) return;
+
+        const id = Number(li.dataset.id);
+        if(!Number.isFinite(id)) return;
+
+        const tarea = getTareaById(id);
+        if(!tarea) return;
+
+        const deleteBtn = target.closest("button.delete");
+        if(deleteBtn){
+            tareas = tareas.filter(t => t.id !== tarea.id);
+            renderTareas();
+            guardarTareas();
+            return;
+        }
+
+        const editBtn = target.closest("button.edit");
+        if(editBtn){
+            const textoEl = li.querySelector(".desc_texto");
+            if(!textoEl) return;
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = tarea.title;
+            input.className = "bg-white/90 text-slate-900 placeholder:text-slate-500 border border-white/20 p-[0.4rem] text-[16px] rounded-[10px] w-full max-w-full";
+
+            textoEl.replaceWith(input);
+            input.focus();
+
+            const previousTitle = tarea.title;
+
+            const commit = () => {
+                const nuevoTexto = input.value.trim();
+                tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
+                renderTareas();
+                guardarTareas();
+            };
+
+            input.addEventListener("keydown", (ev) => {
+                if(ev.key === "Enter") commit();
+            });
+            input.addEventListener("blur", commit);
+        }
+    });
+
+    // Cambios en checkbox (click o teclado)
+    lista.addEventListener("change", (e) => {
+        const target = /** @type {HTMLElement} */ (e.target);
+        if(!(target instanceof HTMLInputElement)) return;
+        if(!target.classList.contains("check")) return;
+
+        const li = target.closest("li");
+        if(!li || !lista.contains(li)) return;
+
+        const id = Number(li.dataset.id);
+        if(!Number.isFinite(id)) return;
+
+        const tarea = getTareaById(id);
+        if(!tarea) return;
+
+        tarea.completed = target.checked;
+        renderTareas();
+        guardarTareas();
+    });
+}
+
 
 cargarTareas();
+initListaDelegation();
 renderTareas();
 
 /**
@@ -79,6 +164,10 @@ function getTareasFiltradas(tareasBase, filtro, query){
 function crearElementoTarea(tarea){
     const fragment = template.content.cloneNode(true);
 
+    /** @type {HTMLLIElement} */
+    const li = fragment.querySelector("li");
+    li.dataset.id = String(tarea.id);
+
     /** @type {HTMLElement} */
     const textoEl = fragment.querySelector(".desc_texto");
     textoEl.textContent = tarea.title;
@@ -97,58 +186,6 @@ function crearElementoTarea(tarea){
     }
 
     return { fragment, textoEl, checkboxEl, editBtn, deleteBtn };
-}
-
-/**
- * Enlaza eventos de una tarea (editar/completar/eliminar).
- * @param {object} params
- * @param {Task} params.tarea
- * @param {HTMLElement} params.textoEl
- * @param {HTMLInputElement} params.checkboxEl
- * @param {HTMLButtonElement} params.editBtn
- * @param {HTMLButtonElement} params.deleteBtn
- * @returns {void}
- */
-function bindTareaEvents({ tarea, textoEl, checkboxEl, editBtn, deleteBtn }){
-    checkboxEl.addEventListener("click", () =>{
-        tarea.completed = !tarea.completed;
-        renderTareas();
-        guardarTareas();
-    });
-
-    deleteBtn.addEventListener("click", () =>{
-        tareas = tareas.filter(t => t.id !== tarea.id);
-        renderTareas();
-        guardarTareas();
-    });
-
-    editBtn.addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = tarea.title;
-      input.className = "bg-white/90 text-slate-900 placeholder:text-slate-500 border border-white/20 p-[0.4rem] text-[16px] rounded-[10px] w-full max-w-full";
-
-      textoEl.replaceWith(input);
-      input.focus();
-
-      const previousTitle = tarea.title;
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          const nuevoTexto = input.value.trim();
-          tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-          renderTareas();
-          guardarTareas();
-        }
-      });
-
-      input.addEventListener("blur", () => {
-        const nuevoTexto = input.value.trim();
-        tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-        renderTareas();
-        guardarTareas();
-      });
-    });
 }
 
 botonesFiltro.forEach(btn => {
@@ -204,8 +241,7 @@ function renderTareas(){
   const tareasFiltradas = getTareasFiltradas(tareas, filtroActivo, busquedaInput.value);
 
   tareasFiltradas.forEach(tarea =>{
-    const { fragment, textoEl, checkboxEl, editBtn, deleteBtn } = crearElementoTarea(tarea);
-    bindTareaEvents({ tarea, textoEl, checkboxEl, editBtn, deleteBtn });
+    const { fragment } = crearElementoTarea(tarea);
     lista.appendChild(fragment);
   });
 
