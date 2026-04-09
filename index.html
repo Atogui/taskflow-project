@@ -20,9 +20,9 @@
         <div class="w-full lg:w-1/2 max-w-[520px]">
             <h2 class="text-2xl">Mis tareas</h2>
             <div class="m-4 ml-0 w-full flex flex-wrap gap-2">
-                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(34,_173,_46)]  text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Todas</button>
-                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Pendientes</button>
-                <button class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Completadas</button>
+                <button data-filter="all" class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(34,_173,_46)]  text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Todas</button>
+                <button data-filter="pending" class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Pendientes</button>
+                <button data-filter="completed" class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Completadas</button>
             </div>
             <div class="extra flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-start">
                 <button class="w-full sm:w-auto hover:cursor-pointer bg-[blue] hover:bg-[rgb(69,_69,_255)] text-[white] font-semibold p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="complete">Completar todas</button>

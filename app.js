@@ -1,18 +1,17 @@
 let tareas = [];
-let filtroActivo = "Todas";
+let filtroActivo = "all";
 
 const form = document.getElementById("form_tarea");
 const input = document.getElementById("input_tarea");
 const lista = document.getElementById("Li_tareas");
 const template = document.getElementById("tarea_template");
-const stats = document.getElementById("stats");
 const totalEl = document.getElementById("total");
 const completedEl = document.getElementById("completadas");
 const pendingEl = document.getElementById("pendientes");
-const botones = document.querySelectorAll(".bot_filtro");
-const completeAll = document.getElementById("complete");
-const wipe = document.getElementById("wipe");
-const searchEl = document.getElementById("search");
+const botonesFiltro = document.querySelectorAll(".bot_filtro");
+const completarTodasBtn = document.getElementById("complete");
+const eliminarCompletadasBtn = document.getElementById("wipe");
+const busquedaInput = document.getElementById("search");
 
 
 cargarTareas();
@@ -28,12 +27,12 @@ function crearTarea(title){
     };
 }
 
-botones.forEach(btn => {
+botonesFiltro.forEach(btn => {
     btn.addEventListener("click", () => {
-        botones.forEach(b => b.classList.replace("bg-[rgb(34,_173,_46)]","bg-[rgb(51,_51,_51)]"));
+        botonesFiltro.forEach(b => b.classList.replace("bg-[rgb(34,_173,_46)]","bg-[rgb(51,_51,_51)]"));
         btn.classList.replace("bg-[rgb(51,_51,_51)]","bg-[rgb(34,_173,_46)]");
 
-        filtroActivo = btn.textContent;
+        filtroActivo = btn.dataset.filter || "all";
         renderTareas();
     });
 });
@@ -53,19 +52,19 @@ form.addEventListener("submit", function(e){
   input.value = "";
 });
 
-completeAll.addEventListener("click", () => {
+completarTodasBtn.addEventListener("click", () => {
     tareas.forEach(t => t.completed = true);
     renderTareas();
     guardarTareas();
 });
 
-wipe.addEventListener("click", () => {
+eliminarCompletadasBtn.addEventListener("click", () => {
     tareas = tareas.filter(t => !t.completed);
     renderTareas();
     guardarTareas();
 });
 
-searchEl.addEventListener("keyup", () => {
+busquedaInput.addEventListener("keyup", () => {
     renderTareas();
 });
 
@@ -75,16 +74,16 @@ function renderTareas(){
 
   let tareasFiltradas = tareas;
 
-  if(filtroActivo === "Completadas"){
+  if(filtroActivo === "completed"){
       tareasFiltradas = tareasFiltradas.filter(t => t.completed);
   }
 
-  if(filtroActivo === "Pendientes"){
+  if(filtroActivo === "pending"){
       tareasFiltradas = tareasFiltradas.filter(t => !t.completed);
   }
 
-  if(searchEl.value){
-      const q = searchEl.value.toLowerCase();
+  if(busquedaInput.value){
+      const q = busquedaInput.value.toLowerCase();
       tareasFiltradas = tareasFiltradas.filter(t => t.title.toLowerCase().includes(q));
   }
 
