@@ -18,6 +18,7 @@ const searchEl = document.getElementById("search");
 cargarTareas();
 renderTareas();
 
+/* Funcion para crear una nueva tarea */
 function crearTarea(title){
     return{
         id: Date.now(),
@@ -68,22 +69,24 @@ searchEl.addEventListener("keyup", () => {
     renderTareas();
 });
 
+/* Funcion para renderizar las tareas */
 function renderTareas(){
   lista.innerHTML = "";
 
-  tareasFiltradas = tareas;
+  let tareasFiltradas = tareas;
 
-    if(searchEl.value){
-        tareasFiltradas = tareasFiltradas.filter(t => t.title.toLowerCase().includes(searchEl.value.toLowerCase()));
-    }
+  if(filtroActivo === "Completadas"){
+      tareasFiltradas = tareasFiltradas.filter(t => t.completed);
+  }
 
-    if(filtroActivo === "Completadas"){
-        tareasFiltradas = tareas.filter(t => t.completed);
-    }
+  if(filtroActivo === "Pendientes"){
+      tareasFiltradas = tareasFiltradas.filter(t => !t.completed);
+  }
 
-    if(filtroActivo === "Pendientes"){
-        tareasFiltradas = tareas.filter(t => !t.completed);
-    }
+  if(searchEl.value){
+      const q = searchEl.value.toLowerCase();
+      tareasFiltradas = tareasFiltradas.filter(t => t.title.toLowerCase().includes(q));
+  }
 
 
 
@@ -94,11 +97,15 @@ function renderTareas(){
     const texto = clone.querySelector(".desc_texto");
     texto.textContent = tarea.title;
 
+    const checkbox = clone.querySelector(".check");
+    checkbox.checked = tarea.completed;
+
     clone.querySelector(".edit").addEventListener("click", () => {
       
       const input = document.createElement("input");
       input.type = "text";
       input.value = tarea.title;
+      input.className = "bg-white/90 text-slate-900 placeholder:text-slate-500 border border-white/20 p-[0.4rem] text-[16px] rounded-[10px] w-full max-w-full";
 
       texto.replaceWith(input);
 
@@ -108,16 +115,18 @@ function renderTareas(){
         if (e.key === "Enter") {
           tarea.title = input.value;
           renderTareas();
+          guardarTareas();
         }
       });
 
       input.addEventListener("blur", () => {
         tarea.title = input.value;
         renderTareas();
+        guardarTareas();
       });
     });
 
-    clone.querySelector(".check").addEventListener("click", () =>{
+    checkbox.addEventListener("click", () =>{
         tarea.completed = !tarea.completed;
         renderTareas();
         guardarTareas();
@@ -127,7 +136,6 @@ function renderTareas(){
         tareas = tareas.filter(t => t.id !== tarea.id);
         renderTareas();
         guardarTareas();
-        renderStats();
     });
 
     if (tarea.completed){
@@ -135,8 +143,10 @@ function renderTareas(){
     }
 
     lista.appendChild(clone);
-    renderStats();
   });
+
+  // Actualiza stats incluso si no hay tareas renderizadas
+  renderStats();
 }
 
 function renderStats(){
