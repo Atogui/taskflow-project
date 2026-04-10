@@ -44,3 +44,53 @@ Durante el desarrollo de **TaskFlow** he utilizado Cursor como apoyo para iterar
 
 ### 7) Accesibilidad y detalles finales (Paso 7)
 - Se cambió `lang` a `es`, se actualizó el `<title>`, y se añadieron `aria-label` a botones de editar/eliminar para mejorar accesibilidad.
+
+Configuración de servidor MCP de GitHub en Cursor
+Requisitos previos
+Node.js instalado con npm, npx y node accesibles desde terminal.
+
+1. Obtener token de GitHub
+github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
+Permisos necesarios: repo, read:org, read:user. Copia el token — solo se muestra una vez.
+
+2. Crear .cursor/mcp.json
+json{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_tuTokenAqui"
+      }
+    }
+  }
+}
+Usa .cursor/mcp.json para alcance de proyecto o ~/.cursor/mcp.json para global.
+
+3. Verificar en Cursor
+Reinicia Cursor y ve a Settings → Tools & MCP. El servidor debe aparecer con un punto verde y listar las herramientas disponibles (create_issue, create_pull_request, list_commits, etc.).
+
+4. Usar desde el chat
+"Lista los issues abiertos de mi repo X"
+"Crea un PR con los cambios actuales"
+"¿Cuáles fueron los últimos 5 commits de main?"
+
+Casos de uso reales de MCP
+
+Desarrollo de software en equipo
+Conectas MCP con GitHub y tu base de datos. El agente puede revisar issues abiertos, leer el esquema de la base de datos y generar migraciones o código directamente en el contexto de tu proyecto real, sin que tengas que copiar y pegar nada manualmente.
+
+Dashboard o app con Notion como backend
+Muchos equipos pequeños usan Notion como base de datos ligera. Con un servidor MCP de Notion, el agente puede leer y escribir páginas, crear entradas nuevas o actualizar registros mientras tú le describes los cambios en lenguaje natural desde Cursor.
+
+Automatización de reportes
+Conectas MCP a una base de datos Postgres o MySQL con los datos de tu negocio. En lugar de escribir queries a mano, le pides al agente cosas como "dame las ventas del último mes agrupadas por producto" y él genera y ejecuta la consulta directamente.
+
+Monitorización y logs
+Con un servidor MCP conectado a tus logs (Datadog, archivos locales, etc.), puedes preguntarle al agente "¿hubo errores 500 en las últimas 2 horas?" mientras estás depurando, sin salir del editor.
+
+Gestión de infraestructura
+Con el servidor MCP de Azure o AWS, puedes pedirle al agente que liste tus recursos cloud, revise configuraciones o incluso ejecute operaciones directamente desde el chat de Cursor mientras desarrollas.
+
+Proyectos personales o freelance
+Si gestionas tareas en Trello o Linear, conectas MCP y el agente puede crear tarjetas, mover tareas o actualizar estados mientras codificas, sin cambiar de ventana.
