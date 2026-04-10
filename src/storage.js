@@ -26,6 +26,17 @@ window.TaskFlow = window.TaskFlow || {};
           typeof obj.reminderAt === "string" && obj.reminderAt.trim() !== ""
             ? obj.reminderAt.trim()
             : null;
+        const priority =
+          obj.priority === "high" || obj.priority === "low" || obj.priority === "medium"
+            ? obj.priority
+            : "medium";
+        const tags = Array.isArray(obj.tags)
+          ? obj.tags
+              .map((x) => String(x).trim())
+              .filter((x) => x !== "")
+              .map((x) => x.toLowerCase())
+              .filter((x, idx, arr) => arr.indexOf(x) === idx)
+          : [];
         return {
           id: typeof obj.id === "number" ? obj.id : Date.now(),
           title: typeof obj.title === "string" ? obj.title.trim() : "",
@@ -36,6 +47,8 @@ window.TaskFlow = window.TaskFlow || {};
               : new Date().toISOString(),
           dueDate,
           reminderAt,
+          priority,
+          tags,
         };
       })
       .filter((t) => t.title !== "");

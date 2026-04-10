@@ -33,6 +33,14 @@ window.TaskFlow = window.TaskFlow || {};
   const reminderAtInput = document.getElementById("reminder_at");
   /** @type {HTMLButtonElement} */
   const enableRemindersBtn = document.getElementById("enable_reminders");
+  /** @type {HTMLSelectElement} */
+  const prioritySelect = document.getElementById("priority");
+  /** @type {HTMLInputElement} */
+  const tagsInput = document.getElementById("tags");
+  /** @type {HTMLSelectElement} */
+  const tagFilterSelect = document.getElementById("tag_filter");
+  /** @type {HTMLSelectElement} */
+  const sortModeSelect = document.getElementById("sort_mode");
 
   // Carga inicial
   state.tasks = storage.loadTasks();
@@ -48,6 +56,10 @@ window.TaskFlow = window.TaskFlow || {};
     busquedaInput,
     dueDateInput,
     reminderAtInput,
+    prioritySelect,
+    tagsInput,
+    tagFilterSelect,
+    sortModeSelect,
     enableRemindersBtn,
     totalEl,
     completedEl,

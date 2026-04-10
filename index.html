@@ -28,6 +28,23 @@
                 <button data-filter="pending" class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Pendientes</button>
                 <button data-filter="completed" class="bot_filtro [@media(max-width:1130px)]:text-[12px] bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer mr-2 p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]">Completadas</button>
             </div>
+            <div class="m-4 ml-0 flex flex-col sm:flex-row gap-2 sm:items-center">
+                <label class="text-sm text-slate-200/90">
+                    Filtrar etiqueta
+                    <select id="tag_filter" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                        <option value="all">Todas</option>
+                    </select>
+                </label>
+                <label class="text-sm text-slate-200/90">
+                    Ordenar
+                    <select id="sort_mode" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                        <option value="createdDesc">Más nuevas</option>
+                        <option value="createdAsc">Más antiguas</option>
+                        <option value="priorityDesc">Prioridad alta</option>
+                        <option value="priorityAsc">Prioridad baja</option>
+                    </select>
+                </label>
+            </div>
             <div class="extra flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-start">
                 <button class="w-full sm:w-auto hover:cursor-pointer bg-[blue] hover:bg-[rgb(69,_69,_255)] text-[white] font-semibold p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="complete">Completar todas</button>
                 <button class="w-full sm:w-auto hover:cursor-pointer bg-[red] hover:bg-[rgb(255,_91,_91)] text-[white] font-semibold p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="wipe">Eliminar completadas</button>
@@ -47,6 +64,18 @@
                     <label class="text-sm text-slate-200/90">
                         Recordatorio
                         <input id="reminder_at" type="datetime-local" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                    </label>
+                    <label class="text-sm text-slate-200/90">
+                        Prioridad
+                        <select id="priority" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                            <option value="low">Baja</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </label>
+                    <label class="text-sm text-slate-200/90">
+                        Etiquetas
+                        <input id="tags" type="text" placeholder="ej: casa, daw" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
                     </label>
                 </div>
             </form>
@@ -74,6 +103,10 @@
                     <p class="desc_texto"></p>
                 </div>
                 <p class="due_text text-xs text-slate-200/80"></p>
+                <div class="meta flex flex-wrap gap-2 items-center">
+                    <span class="priority_badge text-xs px-2 py-1 rounded-full bg-white/10 border border-white/15"></span>
+                    <div class="tags flex flex-wrap gap-1"></div>
+                </div>
             </div>
             <div class="botones_tarea">
                 <button aria-label="Editar tarea" class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-emerald-300 edit"><i class="fa-solid fa-pen-to-square"></i></button>

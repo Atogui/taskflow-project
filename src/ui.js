@@ -19,6 +19,10 @@ window.TaskFlow = window.TaskFlow || {};
    * @param {HTMLInputElement} refs.busquedaInput
    * @param {HTMLInputElement} refs.dueDateInput
    * @param {HTMLInputElement} refs.reminderAtInput
+   * @param {HTMLSelectElement} refs.prioritySelect
+   * @param {HTMLInputElement} refs.tagsInput
+   * @param {HTMLSelectElement} refs.tagFilterSelect
+   * @param {HTMLSelectElement} refs.sortModeSelect
    * @param {HTMLButtonElement} refs.enableRemindersBtn
    * @param {HTMLElement} refs.totalEl
    * @param {HTMLElement} refs.completedEl
@@ -34,6 +38,45 @@ window.TaskFlow = window.TaskFlow || {};
       if (reminders && typeof reminders.reschedule === "function") {
         reminders.reschedule(state.tasks);
       }
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    function getAllTags() {
+      const tags = new Set();
+      state.tasks.forEach((t) => {
+        if (!t || !Array.isArray(t.tags)) return;
+        t.tags.forEach((x) => {
+          const s = String(x).trim().toLowerCase();
+          if (s) tags.add(s);
+        });
+      });
+      return Array.from(tags).sort((a, b) => a.localeCompare(b));
+    }
+
+    function syncTagFilterOptions() {
+      if (!refs.tagFilterSelect) return;
+      const prev = refs.tagFilterSelect.value || "all";
+      const tags = getAllTags();
+      refs.tagFilterSelect.innerHTML = "";
+
+      const optAll = document.createElement("option");
+      optAll.value = "all";
+      optAll.textContent = "Todas";
+      refs.tagFilterSelect.appendChild(optAll);
+
+      tags.forEach((tag) => {
+        const opt = document.createElement("option");
+        opt.value = tag;
+        opt.textContent = tag;
+        refs.tagFilterSelect.appendChild(opt);
+      });
+
+      // Mantener selección si existe
+      const stillExists = prev === "all" || tags.includes(prev);
+      refs.tagFilterSelect.value = stillExists ? prev : "all";
+      state.activeTag = refs.tagFilterSelect.value;
     }
 
     /**
@@ -99,6 +142,34 @@ window.TaskFlow = window.TaskFlow || {};
         }
       }
 
+      const priorityEl = /** @type {HTMLElement | null} */ (
+        fragment.querySelector(".priority_badge")
+      );
+      if (priorityEl) {
+        const p = tarea.priority || "medium";
+        priorityEl.textContent =
+          p === "high" ? "Alta" : p === "low" ? "Baja" : "Media";
+        priorityEl.classList.remove("text-red-200", "text-amber-200", "text-emerald-200");
+        if (p === "high") priorityEl.classList.add("text-red-200");
+        if (p === "medium") priorityEl.classList.add("text-amber-200");
+        if (p === "low") priorityEl.classList.add("text-emerald-200");
+      }
+
+      const tagsWrap = /** @type {HTMLElement | null} */ (
+        fragment.querySelector(".tags")
+      );
+      if (tagsWrap) {
+        tagsWrap.innerHTML = "";
+        const tags = Array.isArray(tarea.tags) ? tarea.tags : [];
+        tags.forEach((tag) => {
+          const chip = document.createElement("span");
+          chip.className =
+            "text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-200/90";
+          chip.textContent = `#${tag}`;
+          tagsWrap.appendChild(chip);
+        });
+      }
+
       return fragment;
     }
 
@@ -108,7 +179,9 @@ window.TaskFlow = window.TaskFlow || {};
       const tareasFiltradas = stateApi.getFilteredTasks(
         state.tasks,
         state.activeFilter,
-        refs.busquedaInput.value
+        refs.busquedaInput.value,
+        state.activeTag,
+        state.sortMode
       );
 
       tareasFiltradas.forEach((t) => {
@@ -225,12 +298,27 @@ window.TaskFlow = window.TaskFlow || {};
 
       nueva.dueDate = dueDate !== "" ? dueDate : null;
       nueva.reminderAt = reminderAt !== "" ? reminderAt : null;
+      if (refs.prioritySelect && typeof refs.prioritySelect.value === "string") {
+        const p = refs.prioritySelect.value;
+        nueva.priority = p === "high" || p === "low" || p === "medium" ? p : "medium";
+      }
+      if (refs.tagsInput && typeof refs.tagsInput.value === "string") {
+        const raw = refs.tagsInput.value;
+        const tags = raw
+          .split(",")
+          .map((x) => x.trim().toLowerCase())
+          .filter((x) => x !== "");
+        nueva.tags = tags.filter((x, idx, arr) => arr.indexOf(x) === idx);
+      }
 
       state.tasks.push(nueva);
       persistRenderReschedule();
       refs.inputNueva.value = "";
       if (refs.dueDateInput) refs.dueDateInput.value = "";
       if (refs.reminderAtInput) refs.reminderAtInput.value = "";
+      if (refs.prioritySelect) refs.prioritySelect.value = "medium";
+      if (refs.tagsInput) refs.tagsInput.value = "";
+      syncTagFilterOptions();
     });
 
     // Acciones
@@ -247,6 +335,20 @@ window.TaskFlow = window.TaskFlow || {};
     // Búsqueda (mantengo keyup para no cambiar UX)
     refs.busquedaInput.addEventListener("keyup", () => renderTasks());
 
+    // Tag filter + sort
+    if (refs.tagFilterSelect) {
+      refs.tagFilterSelect.addEventListener("change", () => {
+        state.activeTag = refs.tagFilterSelect.value || "all";
+        renderTasks();
+      });
+    }
+    if (refs.sortModeSelect) {
+      refs.sortModeSelect.addEventListener("change", () => {
+        state.sortMode = refs.sortModeSelect.value || "createdDesc";
+        renderTasks();
+      });
+    }
+
     // Recordatorios
     if (refs.enableRemindersBtn) {
       refs.enableRemindersBtn.addEventListener("click", async () => {
@@ -257,6 +359,7 @@ window.TaskFlow = window.TaskFlow || {};
     }
 
     initDelegation();
+    syncTagFilterOptions();
     renderTasks();
     if (reminders && typeof reminders.reschedule === "function") {
       reminders.reschedule(state.tasks);
