@@ -9,6 +9,7 @@
     <script src="https://kit.fontawesome.com/66b6826106.js" crossorigin="anonymous"></script>
     <script src="src/storage.js" defer></script>
     <script src="src/state.js" defer></script>
+    <script src="src/reminders.js" defer></script>
     <script src="src/ui.js" defer></script>
     <script src="src/main.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -32,10 +33,22 @@
                 <button class="w-full sm:w-auto hover:cursor-pointer bg-[red] hover:bg-[rgb(255,_91,_91)] text-[white] font-semibold p-[0.7rem] pr-6 pl-6 min-w-[100px] border-none rounded-[20px] text-[16px]" id="wipe">Eliminar completadas</button>
             </div>
             <form id="form_tarea" class="m-4 ml-0">
-                <input class="bg-white/90 text-slate-900 placeholder:text-slate-500 border-none [border-bottom:solid] border p-[0.4rem] w-[85%] text-[16px] rounded-[10px]" id="input_tarea" type="text" placeholder="Añade una nueva tarea">
-                <button type="submit" class="bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer p-2 pr-[0.7rem] pl-[0.7rem] ml-2 border-none rounded-[12px] min-w-[40px] min-h-[40px] text-[18px]">
+                <div class="flex gap-2 items-center">
+                    <input class="bg-white/90 text-slate-900 placeholder:text-slate-500 border-none [border-bottom:solid] border p-[0.4rem] w-[85%] text-[16px] rounded-[10px]" id="input_tarea" type="text" placeholder="Añade una nueva tarea">
+                    <button type="submit" class="bg-[rgb(51,_51,_51)] text-[white] font-semibold hover:bg-[rgb(90,_90,_90)] hover:cursor-pointer p-2 pr-[0.7rem] pl-[0.7rem] border-none rounded-[12px] min-w-[40px] min-h-[40px] text-[18px]">
                     <i class="fa-solid fa-plus"></i>
-                </button>
+                    </button>
+                </div>
+                <div class="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <label class="text-sm text-slate-200/90">
+                        Fecha límite
+                        <input id="due_date" type="date" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                    </label>
+                    <label class="text-sm text-slate-200/90">
+                        Recordatorio
+                        <input id="reminder_at" type="datetime-local" class="ml-2 bg-white/90 text-slate-900 border border-white/20 p-[0.35rem] rounded-[10px]">
+                    </label>
+                </div>
             </form>
             <input class="bg-white/90 text-slate-900 placeholder:text-slate-500 border-none [border-bottom:solid] border p-[0.4rem] w-[85%] text-[16px] rounded-[10px]" id="search" type="text" placeholder="Buscar tarea">
             <ul class="Li_tareas [list-style:none]" id="Li_tareas"></ul>
@@ -47,12 +60,21 @@
             <p>Total: <span id="total"></span></p>
             <p>Pendientes: <span id="pendientes"></span></p>
             <p>Completadas: <span id="completadas"></span></p>
+            <button id="enable_reminders" class="mt-4 hover:cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-semibold p-[0.7rem] pr-6 pl-6 border-none rounded-[20px] text-[16px]">
+                Activar recordatorios
+            </button>
         </div>
     </div>
     
     <template id="tarea_template">
         <li class="flex flex-row justify-between w-full p-4 m-4 ml-0 border border-solid rounded-[20px] bg-white/10 border-white/20 backdrop-blur-sm"> 
-            <div class="flex"><input class="check mr-[10px] ml-[5px]" type="checkbox"><p class="desc_texto"></p></div>
+            <div class="flex flex-col gap-1 flex-1 pr-3">
+                <div class="flex items-center">
+                    <input class="check mr-[10px] ml-[5px]" type="checkbox">
+                    <p class="desc_texto"></p>
+                </div>
+                <p class="due_text text-xs text-slate-200/80"></p>
+            </div>
             <div class="botones_tarea">
                 <button aria-label="Editar tarea" class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-emerald-300 edit"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button aria-label="Eliminar tarea" class="hover:cursor-pointer border-none ml-2 mr-4 bg-transparent text-slate-100 hover:text-red-300 delete"><i class="fa-solid fa-x"></i></button>

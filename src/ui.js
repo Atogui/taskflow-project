@@ -17,13 +17,45 @@ window.TaskFlow = window.TaskFlow || {};
    * @param {HTMLButtonElement} refs.completarTodasBtn
    * @param {HTMLButtonElement} refs.eliminarCompletadasBtn
    * @param {HTMLInputElement} refs.busquedaInput
+   * @param {HTMLInputElement} refs.dueDateInput
+   * @param {HTMLInputElement} refs.reminderAtInput
+   * @param {HTMLButtonElement} refs.enableRemindersBtn
    * @param {HTMLElement} refs.totalEl
    * @param {HTMLElement} refs.completedEl
    * @param {HTMLElement} refs.pendingEl
    * @returns {void}
    */
   function initUI(refs) {
-    const { state, storage, stateApi } = window.TaskFlow;
+    const { state, storage, stateApi, reminders } = window.TaskFlow;
+
+    function persistRenderReschedule() {
+      renderTasks();
+      storage.saveTasks(state.tasks);
+      if (reminders && typeof reminders.reschedule === "function") {
+        reminders.reschedule(state.tasks);
+      }
+    }
+
+    /**
+     * @param {string | null | undefined} dueDate
+     * @returns {{ label: string, severity: "none"|"upcoming"|"overdue" }}
+     */
+    function getDueLabel(dueDate) {
+      const d = typeof dueDate === "string" ? dueDate.trim() : "";
+      if (!d) return { label: "", severity: "none" };
+
+      const dueTs = Date.parse(`${d}T23:59:59`);
+      if (!Number.isFinite(dueTs)) return { label: "", severity: "none" };
+
+      const now = Date.now();
+      const diffMs = dueTs - now;
+      const oneDay = 24 * 60 * 60 * 1000;
+      const daysLeft = Math.ceil(diffMs / oneDay);
+
+      if (diffMs < 0) return { label: `Vencida: ${d}`, severity: "overdue" };
+      if (daysLeft <= 2) return { label: `Próxima: ${d}`, severity: "upcoming" };
+      return { label: `Fecha límite: ${d}`, severity: "none" };
+    }
 
     function renderStats() {
       const total = state.tasks.length;
@@ -52,6 +84,20 @@ window.TaskFlow = window.TaskFlow || {};
       checkboxEl.checked = tarea.completed;
 
       if (tarea.completed) textoEl.classList.add("line-through");
+
+      const dueEl = /** @type {HTMLElement | null} */ (
+        fragment.querySelector(".due_text")
+      );
+      if (dueEl) {
+        const { label, severity } = getDueLabel(tarea.dueDate);
+        dueEl.textContent = label;
+        dueEl.classList.remove("text-red-300", "text-amber-300");
+        if (severity === "overdue" && !tarea.completed) {
+          dueEl.classList.add("text-red-300");
+        } else if (severity === "upcoming" && !tarea.completed) {
+          dueEl.classList.add("text-amber-300");
+        }
+      }
 
       return fragment;
     }
@@ -89,8 +135,7 @@ window.TaskFlow = window.TaskFlow || {};
 
         if (target.closest("button.delete")) {
           state.tasks = state.tasks.filter((t) => t.id !== tarea.id);
-          renderTasks();
-          storage.saveTasks(state.tasks);
+          persistRenderReschedule();
           return;
         }
 
@@ -108,12 +153,14 @@ window.TaskFlow = window.TaskFlow || {};
           input.focus();
 
           const previousTitle = tarea.title;
+          let committed = false;
 
           const commit = () => {
+            if (committed) return;
+            committed = true;
             const nuevoTexto = input.value.trim();
             tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-            renderTasks();
-            storage.saveTasks(state.tasks);
+            persistRenderReschedule();
           };
 
           input.addEventListener("keydown", (ev) => {
@@ -137,8 +184,7 @@ window.TaskFlow = window.TaskFlow || {};
         if (!tarea) return;
 
         tarea.completed = target.checked;
-        renderTasks();
-        storage.saveTasks(state.tasks);
+        persistRenderReschedule();
       });
     }
 
@@ -167,30 +213,54 @@ window.TaskFlow = window.TaskFlow || {};
       const texto = refs.inputNueva.value.trim();
       if (texto === "") return;
 
-      state.tasks.push(stateApi.createTask(texto));
-      renderTasks();
-      storage.saveTasks(state.tasks);
+      const nueva = stateApi.createTask(texto);
+      const dueDate =
+        refs.dueDateInput && typeof refs.dueDateInput.value === "string"
+          ? refs.dueDateInput.value.trim()
+          : "";
+      const reminderAt =
+        refs.reminderAtInput && typeof refs.reminderAtInput.value === "string"
+          ? refs.reminderAtInput.value.trim()
+          : "";
+
+      nueva.dueDate = dueDate !== "" ? dueDate : null;
+      nueva.reminderAt = reminderAt !== "" ? reminderAt : null;
+
+      state.tasks.push(nueva);
+      persistRenderReschedule();
       refs.inputNueva.value = "";
+      if (refs.dueDateInput) refs.dueDateInput.value = "";
+      if (refs.reminderAtInput) refs.reminderAtInput.value = "";
     });
 
     // Acciones
     refs.completarTodasBtn.addEventListener("click", () => {
       state.tasks.forEach((t) => (t.completed = true));
-      renderTasks();
-      storage.saveTasks(state.tasks);
+      persistRenderReschedule();
     });
 
     refs.eliminarCompletadasBtn.addEventListener("click", () => {
       state.tasks = state.tasks.filter((t) => !t.completed);
-      renderTasks();
-      storage.saveTasks(state.tasks);
+      persistRenderReschedule();
     });
 
     // Búsqueda (mantengo keyup para no cambiar UX)
     refs.busquedaInput.addEventListener("keyup", () => renderTasks());
 
+    // Recordatorios
+    if (refs.enableRemindersBtn) {
+      refs.enableRemindersBtn.addEventListener("click", async () => {
+        if (!reminders || typeof reminders.requestPermission !== "function") return;
+        await reminders.requestPermission();
+        if (typeof reminders.reschedule === "function") reminders.reschedule(state.tasks);
+      });
+    }
+
     initDelegation();
     renderTasks();
+    if (reminders && typeof reminders.reschedule === "function") {
+      reminders.reschedule(state.tasks);
+    }
   }
 
   window.TaskFlow.ui = { initUI };

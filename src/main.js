@@ -27,6 +27,12 @@ window.TaskFlow = window.TaskFlow || {};
   const eliminarCompletadasBtn = document.getElementById("wipe");
   /** @type {HTMLInputElement} */
   const busquedaInput = document.getElementById("search");
+  /** @type {HTMLInputElement} */
+  const dueDateInput = document.getElementById("due_date");
+  /** @type {HTMLInputElement} */
+  const reminderAtInput = document.getElementById("reminder_at");
+  /** @type {HTMLButtonElement} */
+  const enableRemindersBtn = document.getElementById("enable_reminders");
 
   // Carga inicial
   state.tasks = storage.loadTasks();
@@ -40,6 +46,9 @@ window.TaskFlow = window.TaskFlow || {};
     completarTodasBtn,
     eliminarCompletadasBtn,
     busquedaInput,
+    dueDateInput,
+    reminderAtInput,
+    enableRemindersBtn,
     totalEl,
     completedEl,
     pendingEl,

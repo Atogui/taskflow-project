@@ -18,6 +18,14 @@ window.TaskFlow = window.TaskFlow || {};
       .filter((t) => t && typeof t === "object")
       .map((t) => {
         const obj = /** @type {any} */ (t);
+        const dueDate =
+          typeof obj.dueDate === "string" && obj.dueDate.trim() !== ""
+            ? obj.dueDate.trim()
+            : null;
+        const reminderAt =
+          typeof obj.reminderAt === "string" && obj.reminderAt.trim() !== ""
+            ? obj.reminderAt.trim()
+            : null;
         return {
           id: typeof obj.id === "number" ? obj.id : Date.now(),
           title: typeof obj.title === "string" ? obj.title.trim() : "",
@@ -26,6 +34,8 @@ window.TaskFlow = window.TaskFlow || {};
             typeof obj.createdAt === "string"
               ? obj.createdAt
               : new Date().toISOString(),
+          dueDate,
+          reminderAt,
         };
       })
       .filter((t) => t.title !== "");

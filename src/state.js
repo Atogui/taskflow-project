@@ -7,6 +7,8 @@ window.TaskFlow = window.TaskFlow || {};
  * @property {string} title
  * @property {boolean} completed
  * @property {string} createdAt
+ * @property {string | null} dueDate - Fecha límite (YYYY-MM-DD) o null
+ * @property {string | null} reminderAt - Recordatorio (datetime-local) o null
  */
 
 (() => {
@@ -27,6 +29,8 @@ window.TaskFlow = window.TaskFlow || {};
       title,
       completed: false,
       createdAt: new Date().toISOString(),
+      dueDate: null,
+      reminderAt: null,
     };
   }
 
