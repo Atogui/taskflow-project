@@ -23,6 +23,8 @@ window.TaskFlow = window.TaskFlow || {};
    * @param {HTMLInputElement} refs.tagsInput
    * @param {HTMLSelectElement} refs.tagFilterSelect
    * @param {HTMLSelectElement} refs.sortModeSelect
+   * @param {HTMLButtonElement} refs.undoBtn
+   * @param {HTMLButtonElement} refs.redoBtn
    * @param {HTMLButtonElement} refs.enableRemindersBtn
    * @param {HTMLElement} refs.totalEl
    * @param {HTMLElement} refs.completedEl
@@ -30,14 +32,32 @@ window.TaskFlow = window.TaskFlow || {};
    * @returns {void}
    */
   function initUI(refs) {
-    const { state, storage, stateApi, reminders } = window.TaskFlow;
+    const { state, storage, stateApi, reminders, history } = window.TaskFlow;
+
+    function syncHistoryButtons() {
+      if (!refs.undoBtn || !refs.redoBtn || !history) return;
+      refs.undoBtn.disabled = !history.canUndo();
+      refs.redoBtn.disabled = !history.canRedo();
+    }
+
+    /**
+     * Aplica un cambio a `state.tasks`, registra snapshot y persiste.
+     * @param {() => void} mutate
+     */
+    function commitTasksChange(mutate) {
+      mutate();
+      if (history) history.push(state.tasks);
+      persistRenderReschedule();
+    }
 
     function persistRenderReschedule() {
+      syncTagFilterOptions();
       renderTasks();
       storage.saveTasks(state.tasks);
       if (reminders && typeof reminders.reschedule === "function") {
         reminders.reschedule(state.tasks);
       }
+      syncHistoryButtons();
     }
 
     /**
@@ -207,8 +227,9 @@ window.TaskFlow = window.TaskFlow || {};
         if (!tarea) return;
 
         if (target.closest("button.delete")) {
-          state.tasks = state.tasks.filter((t) => t.id !== tarea.id);
-          persistRenderReschedule();
+          commitTasksChange(() => {
+            state.tasks = state.tasks.filter((t) => t.id !== tarea.id);
+          });
           return;
         }
 
@@ -232,8 +253,9 @@ window.TaskFlow = window.TaskFlow || {};
             if (committed) return;
             committed = true;
             const nuevoTexto = input.value.trim();
-            tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
-            persistRenderReschedule();
+            commitTasksChange(() => {
+              tarea.title = nuevoTexto === "" ? previousTitle : nuevoTexto;
+            });
           };
 
           input.addEventListener("keydown", (ev) => {
@@ -256,8 +278,9 @@ window.TaskFlow = window.TaskFlow || {};
         const tarea = getTaskById(id);
         if (!tarea) return;
 
-        tarea.completed = target.checked;
-        persistRenderReschedule();
+        commitTasksChange(() => {
+          tarea.completed = target.checked;
+        });
       });
     }
 
@@ -311,25 +334,27 @@ window.TaskFlow = window.TaskFlow || {};
         nueva.tags = tags.filter((x, idx, arr) => arr.indexOf(x) === idx);
       }
 
-      state.tasks.push(nueva);
-      persistRenderReschedule();
+      commitTasksChange(() => {
+        state.tasks.push(nueva);
+      });
       refs.inputNueva.value = "";
       if (refs.dueDateInput) refs.dueDateInput.value = "";
       if (refs.reminderAtInput) refs.reminderAtInput.value = "";
       if (refs.prioritySelect) refs.prioritySelect.value = "medium";
       if (refs.tagsInput) refs.tagsInput.value = "";
-      syncTagFilterOptions();
     });
 
     // Acciones
     refs.completarTodasBtn.addEventListener("click", () => {
-      state.tasks.forEach((t) => (t.completed = true));
-      persistRenderReschedule();
+      commitTasksChange(() => {
+        state.tasks.forEach((t) => (t.completed = true));
+      });
     });
 
     refs.eliminarCompletadasBtn.addEventListener("click", () => {
-      state.tasks = state.tasks.filter((t) => !t.completed);
-      persistRenderReschedule();
+      commitTasksChange(() => {
+        state.tasks = state.tasks.filter((t) => !t.completed);
+      });
     });
 
     // Búsqueda (mantengo keyup para no cambiar UX)
@@ -349,6 +374,24 @@ window.TaskFlow = window.TaskFlow || {};
       });
     }
 
+    // Undo / Redo
+    if (refs.undoBtn && history) {
+      refs.undoBtn.addEventListener("click", () => {
+        const snapshot = history.undo();
+        if (!snapshot) return;
+        state.tasks = snapshot;
+        persistRenderReschedule();
+      });
+    }
+    if (refs.redoBtn && history) {
+      refs.redoBtn.addEventListener("click", () => {
+        const snapshot = history.redo();
+        if (!snapshot) return;
+        state.tasks = snapshot;
+        persistRenderReschedule();
+      });
+    }
+
     // Recordatorios
     if (refs.enableRemindersBtn) {
       refs.enableRemindersBtn.addEventListener("click", async () => {
@@ -359,8 +402,10 @@ window.TaskFlow = window.TaskFlow || {};
     }
 
     initDelegation();
+    if (history && typeof history.reset === "function") history.reset(state.tasks);
     syncTagFilterOptions();
     renderTasks();
+    syncHistoryButtons();
     if (reminders && typeof reminders.reschedule === "function") {
       reminders.reschedule(state.tasks);
     }

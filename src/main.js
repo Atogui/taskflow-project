@@ -41,6 +41,10 @@ window.TaskFlow = window.TaskFlow || {};
   const tagFilterSelect = document.getElementById("tag_filter");
   /** @type {HTMLSelectElement} */
   const sortModeSelect = document.getElementById("sort_mode");
+  /** @type {HTMLButtonElement} */
+  const undoBtn = document.getElementById("undo");
+  /** @type {HTMLButtonElement} */
+  const redoBtn = document.getElementById("redo");
 
   // Carga inicial
   state.tasks = storage.loadTasks();
@@ -60,6 +64,8 @@ window.TaskFlow = window.TaskFlow || {};
     tagsInput,
     tagFilterSelect,
     sortModeSelect,
+    undoBtn,
+    redoBtn,
     enableRemindersBtn,
     totalEl,
     completedEl,

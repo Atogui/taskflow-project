@@ -10,6 +10,7 @@
     <script src="src/storage.js" defer></script>
     <script src="src/state.js" defer></script>
     <script src="src/reminders.js" defer></script>
+    <script src="src/history.js" defer></script>
     <script src="src/ui.js" defer></script>
     <script src="src/main.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -89,6 +90,14 @@
             <p>Total: <span id="total"></span></p>
             <p>Pendientes: <span id="pendientes"></span></p>
             <p>Completadas: <span id="completadas"></span></p>
+            <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                <button id="undo" class="w-full sm:w-auto hover:cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-semibold p-[0.7rem] pr-6 pl-6 border-none rounded-[20px] text-[16px]" disabled>
+                    Deshacer
+                </button>
+                <button id="redo" class="w-full sm:w-auto hover:cursor-pointer bg-slate-700 hover:bg-slate-600 text-white font-semibold p-[0.7rem] pr-6 pl-6 border-none rounded-[20px] text-[16px]" disabled>
+                    Rehacer
+                </button>
+            </div>
             <button id="enable_reminders" class="mt-4 hover:cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-semibold p-[0.7rem] pr-6 pl-6 border-none rounded-[20px] text-[16px]">
                 Activar recordatorios
             </button>
