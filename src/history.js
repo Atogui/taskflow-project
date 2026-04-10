@@ -10,6 +10,9 @@ window.TaskFlow = window.TaskFlow || {};
   let future = [];
 
   /**
+   * Clonación profunda para snapshots.
+   * - Usa `structuredClone` si está disponible.
+   * - Fallback: JSON (suficiente para el estado actual: arrays/objetos simples).
    * @template T
    * @param {T} value
    * @returns {T}
@@ -20,7 +23,8 @@ window.TaskFlow = window.TaskFlow || {};
   }
 
   /**
-   * Guarda un snapshot "antes del cambio".
+   * Guarda un snapshot del estado actual (por ejemplo, `state.tasks`).
+   * Importante: al hacer `push`, se invalida el stack de redo.
    * @param {any} snapshot
    */
   function push(snapshot) {
@@ -30,6 +34,7 @@ window.TaskFlow = window.TaskFlow || {};
   }
 
   /**
+   * Reinicia el historial con un snapshot inicial (estado base).
    * @param {any} snapshot
    */
   function reset(snapshot) {
@@ -37,16 +42,26 @@ window.TaskFlow = window.TaskFlow || {};
     future = [];
   }
 
+  /**
+   * Indica si hay un estado anterior disponible.
+   * @returns {boolean}
+   */
   function canUndo() {
     return past.length > 1;
   }
 
+  /**
+   * Indica si hay un estado siguiente disponible (tras un undo).
+   * @returns {boolean}
+   */
   function canRedo() {
     return future.length > 0;
   }
 
   /**
-   * Devuelve el snapshot anterior.
+   * Deshace al snapshot anterior.
+   * - Mueve el snapshot actual al stack `future`.
+   * - Devuelve el snapshot anterior (clonado) para aplicarlo al estado.
    * @returns {any | null}
    */
   function undo() {
@@ -57,7 +72,9 @@ window.TaskFlow = window.TaskFlow || {};
   }
 
   /**
-   * Devuelve el snapshot siguiente.
+   * Rehace al snapshot siguiente.
+   * - Mueve el snapshot desde `future` a `past`.
+   * - Devuelve ese snapshot (clonado) para aplicarlo al estado.
    * @returns {any | null}
    */
   function redo() {

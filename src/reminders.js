@@ -5,6 +5,10 @@ window.TaskFlow = window.TaskFlow || {};
   /** @type {Map<number, number>} */
   const timersByTaskId = new Map();
 
+  /**
+   * Limpia todos los timeouts programados.
+   * @returns {void}
+   */
   function clearAll() {
     timersByTaskId.forEach((timerId) => clearTimeout(timerId));
     timersByTaskId.clear();
@@ -21,6 +25,10 @@ window.TaskFlow = window.TaskFlow || {};
     return Number.isFinite(ts) ? ts : null;
   }
 
+  /**
+   * Solicita permisos de notificaciones (si el navegador lo soporta).
+   * @returns {Promise<NotificationPermission | "unsupported">}
+   */
   async function requestPermission() {
     if (!("Notification" in window)) return "unsupported";
     if (Notification.permission === "granted") return "granted";
@@ -34,6 +42,11 @@ window.TaskFlow = window.TaskFlow || {};
 
   /**
    * Programa recordatorios para todas las tareas actuales.
+   *
+   * Notas:
+   * - Solo funciona mientras la app está abierta.
+   * - `setTimeout` tiene un límite (~24.8 días). Si un recordatorio queda más lejos,
+   *   se programa hasta ese máximo.
    * @param {Array<{id:number,title:string,completed:boolean,reminderAt?:string|null}>} tasks
    * @returns {void}
    */
