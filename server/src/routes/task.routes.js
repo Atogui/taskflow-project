@@ -1,0 +1,11 @@
+const express = require("express");
+const taskController = require("../controllers/task.controller");
+const router = express.Router();
+router.get("/", taskController.obtenerTodas);
+router.post("/", taskController.crearTarea);
+router.delete("/:id", taskController.eliminarTarea);
+router.patch("/:id", taskController.actualizarTarea);
+router.patch("/:id/complete", taskController.completarTarea);
+router.patch("/:id/uncomplete", taskController.descompletarTarea);
+router.put("/:id", taskController.reemplazarTarea);
+module.exports = router;
